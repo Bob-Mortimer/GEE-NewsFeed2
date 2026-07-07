@@ -9,7 +9,25 @@ from google.oauth2 import service_account
 # =========================================================================
 # 1. PAGE CONFIGURATION & INITIALIZATION
 # =========================================================================
+# Set wide layout and minimize Streamlit's default block padding via CSS
 st.set_page_config(layout="wide", page_title="Geospatial Intelligence Dashboard")
+
+st.markdown("""
+    <style>
+        /* Compress the top and bottom padding of the main Streamlit container */
+        .block-container {
+            padding-top: 2rem !important;
+            padding-bottom: 0rem !important;
+        }
+        /* Remove border and padding from iframes to kill dead space */
+        iframe {
+            border: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            display: block;
+        }
+    </style>
+""", unsafe_allow_html=True)
 
 @st.cache_resource
 def initialize_ee():
@@ -45,7 +63,6 @@ def get_coordinates_opencage(query):
     return None, None
 
 def fetch_intelligence_news(user_query):
-    """Fetches news automatically. Uses the city/base name if provided."""
     api_key = st.secrets.get("newsapi_key", None)
     if not api_key:
         st.error("Missing NewsAPI Key in secrets.")
@@ -53,7 +70,6 @@ def fetch_intelligence_news(user_query):
         
     keywords = '(military OR cyber OR politics OR political OR president OR "prime minister" OR conflict OR flashpoint)'
     
-    # If a location was typed, append it. Otherwise, just run the global keywords.
     if user_query and user_query.strip():
         q = f"({keywords}) AND ({user_query.strip()})"
     else:
@@ -132,13 +148,12 @@ def create_maps(lat, lon, start1, end1, start2, end2, sensitivity):
     s1_clean_mask = s1_raw_mask.focal_mode(radius=30, units='meters')
     s1_red_dots = s1_clean_mask.updateMask(s1_clean_mask)
 
-    # Styling
     vis_s2 = {'bands': ['B4', 'B3', 'B2'], 'min': 0, 'max': 3000}
     vis_diff = {'min': 1, 'max': 1, 'palette': ['FF0000']} 
     vis_s1 = {'min': -25, 'max': 0}
     
-    # NEW: Increased height to 500px and 100% width
-    map_kwargs = {'location': [lat, lon], 'zoom_start': 13, 'tiles': 'CartoDB dark_matter', 'width': '100%', 'height': 500}
+    # FIX: Force internal map dimensions to 100% so it perfectly fills the outer component
+    map_kwargs = {'location': [lat, lon], 'zoom_start': 13, 'tiles': 'CartoDB dark_matter', 'width': '100%', 'height': '100%'}
     
     maps = []
     for layer_setup in [
@@ -159,13 +174,12 @@ def create_maps(lat, lon, start1, end1, start2, end2, sensitivity):
 # 3. STREAMLIT UI & LAYOUT
 # =========================================================================
 
-st.markdown("<h3 style='text-align: center; color: red; margin-bottom: 0px;'>UNOFFICIAL</h3>", unsafe_allow_html=True)
+st.markdown("<h3 style='text-align: center; color: red; margin-top: -30px; margin-bottom: 0px;'>UNOFFICIAL</h3>", unsafe_allow_html=True)
 st.title("🛰️ Multi-Sensor Intelligence & Monitoring Dashboard")
 
 # ----------------- LEFT SIDEBAR (Inputs) -----------------
 location_query = st.sidebar.text_input("📍 Target Location (City, Base, Coordinates):")
 
-# REQ 1: Default to Null Island / 0.0000, 0.0000
 default_lat, default_lon = 0.0000, 0.0000
 display_name = "0.0000, 0.0000" 
 
@@ -195,14 +209,12 @@ if submit_button:
     st.session_state['generate_maps'] = True
 
 # ----------------- MAIN LAYOUT (Maps vs News) -----------------
-# Reduced the gap to compress unused space
 col_maps, col_news = st.columns([3, 1], gap="small")
 
 # ---> RIGHT COLUMN: News Feed
 with col_news:
-    st.markdown("<h4 style='margin-top: 0px;'>📡 Intelligence Feed</h4>", unsafe_allow_html=True)
+    st.markdown("<h4 style='margin-top: 0px; margin-bottom: 10px;'>📡 Intelligence Feed</h4>", unsafe_allow_html=True)
     
-    # REQ 2: Automatically trigger based on city typed
     if st.session_state.get('generate_maps', False):
         with st.spinner("Intercepting global feeds..."):
             articles = fetch_intelligence_news(location_query)
@@ -226,30 +238,32 @@ with col_maps:
         with st.spinner("Processing Server-Side Imagery & Calculating Topography..."):
             maps = create_maps(lat_val, lon_val, start1, end1, start2, end2, sensitivity_val)
             
-        # REQ 4: Minimize unused space with HTML formatting rather than Streamlit's default headers
         def render_map_card(title, map_obj, subtitle):
+            # Tighter text formatting above each map to reclaim vertical space
             st.markdown(
-                f"<div style='margin-bottom: 5px; margin-top: 10px;'>"
+                f"<div style='margin-bottom: 0px; margin-top: 5px;'>"
                 f"<h5 style='margin: 0px; padding: 0px;'>{title}</h5>"
                 f"<p style='margin: 0px; padding: 0px; color: #888; font-size: 0.85rem;'>{subtitle}</p>"
                 f"</div>", 
                 unsafe_allow_html=True
             )
             
-            # REQ 3: Inject CSS to completely kill the iFrame scrollbars
-            map_html = map_obj._repr_html_()
-            map_html = map_html.replace("<head>", "<head><style>body {overflow: hidden !important; margin: 0 !important; padding: 0 !important;}</style>")
-            components.html(map_html, height=500, scrolling=False)
+            # FIX: Extract raw HTML using .get_root().render() instead of _repr_html_() to avoid double-iframing
+            map_html = map_obj.get_root().render()
+            
+            # FIX: Explicitly strip body margins inside the pure HTML structure
+            map_html = map_html.replace("<head>", "<head><style>html, body {width: 100% !important; height: 100% !important; overflow: hidden !important; margin: 0 !important; padding: 0 !important;}</style>")
+            
+            # Increased map height to 550px for maximum screen utilization
+            components.html(map_html, height=550, scrolling=False)
 
-        # Map Grid with smaller gap
+        # Map Grid with compressed gap logic
         map_row1_col1, map_row1_col2 = st.columns(2, gap="small")
         with map_row1_col1:
             render_map_card("1. Optical Baseline", maps[0], "Sentinel-2 | Standard RGB")
         with map_row1_col2:
             render_map_card("2. Optical Comparison", maps[1], "Sentinel-2 | SSIM Overlays (Red)")
             
-        # Removed the `st.write("---")` divider here to compress the layout vertically
-        
         map_row2_col1, map_row2_col2 = st.columns(2, gap="small")
         with map_row2_col1:
             render_map_card("3. SAR Baseline", maps[2], "Sentinel-1 | Active Radar")
