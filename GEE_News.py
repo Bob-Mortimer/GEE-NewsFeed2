@@ -177,7 +177,7 @@ st.markdown("<h3 style='text-align: center; color: red; margin-top: -30px; margi
 st.title("🛰️ Multi-Sensor Intelligence & Monitoring Dashboard")
 
 st.markdown("""
-This dashboard provides a unified tactical monitoring system that pairs multi-sensor satellite data with real-time open-source intelligence. By computing automated server-side optical structural anomalies (SSIM) and cleaned radar variations (SAR log-ratio) across dual time frames via Google Earth Engine, it highlights critical physical shifts on the ground alongside filtered geopolitical briefing updates. Ultimately, it serves as a streamlined, low-latency reconnaissance workspace for detecting and contextualising changes at key global flashpoints.
+This dashboard provides a unified tactical monitoring system that pairs multi-sensor satellite data with real-time open-source intelligence. By computing automated server-side optical structural anomalies (SSIM) and cleaned radar variations (SAR log-ratio) across dual time frames via Google Earth Engine, it highlights critical physical shifts on the ground alongside filtered geopolitical briefing updates. Ultimately, it serves as a streamlined, low-latency reconnaissance workspace for detecting and contextualizing changes at key global flashpoints.
 """)
 
 with st.expander("🌍 The Copernicus Programme & Technologies"):
@@ -203,7 +203,7 @@ with st.expander("🌍 The Copernicus Programme & Technologies"):
     """)
 
 # ----------------- LEFT SIDEBAR (Inputs) -----------------
-location_query = st.sidebar.text_input("📍 Target Location (City, Base, Coordinates):")
+location_query = st.sidebar.text_input("📍 Target Location:")
 
 default_lat, default_lon = 0.0000, 0.0000
 display_name = "0.0000, 0.0000" 
@@ -218,14 +218,19 @@ if location_query:
         st.sidebar.warning("Could not find coordinates. Using default.")
 
 with st.sidebar.form("dashboard_controls"):
-    lat_val = st.number_input("Latitude", value=float(default_lat), format="%.6f")
-    lon_val = st.number_input("Longitude", value=float(default_lon), format="%.6f")
+    # Using columns inside the sidebar to compress vertical space
+    col_lat, col_lon = st.columns(2)
+    with col_lat:
+        lat_val = st.number_input("Latitude", value=float(default_lat), format="%.6f")
+    with col_lon:
+        lon_val = st.number_input("Longitude", value=float(default_lon), format="%.6f")
     
-    st.markdown("---")
-    d1_val = st.date_input("Baseline Target Date", value=date(2025, 6, 1))
-    d2_val = st.date_input("Comparison Target Date", value=date(2026, 6, 1))
+    col_d1, col_d2 = st.columns(2)
+    with col_d1:
+        d1_val = st.date_input("Baseline Date", value=date(2025, 6, 1))
+    with col_d2:
+        d2_val = st.date_input("Comparison Date", value=date(2026, 6, 1))
     
-    st.markdown("---")
     sensitivity_val = st.slider("Change Detection Sensitivity", 0.0, 1.0, 0.5)
     
     submit_button = st.form_submit_button("Execute Satellite Sweep", type="primary", use_container_width=True)
