@@ -289,3 +289,16 @@ with col_maps:
             render_map_card("4. SAR Comparison", maps[3], "Sentinel-1 | Log-Ratio Overlays (Red)")
     else:
         st.info("Input target coordinates or location in the sidebar to begin reconnaissance.")
+
+# =========================================================================
+# 4. FOOTER & DISCLAIMER
+# =========================================================================
+st.markdown("---")
+st.markdown("""
+### ⚠️ Analytical Disclaimer & Operational Note
+This dashboard provides data derived from automated statistical modeling, including Structural Similarity Index (SSIM) and radar log-ratio processing, rendered in a live environment. Users must be aware that:
+
+*   **Algorithmic Limitations:** The highlighted change detection markers are generated via automated algorithms and are prone to false positives caused by atmospheric conditions, sensor noise, or environmental variance.
+*   **Need for Expert Review:** This information does not constitute validated intelligence. It is intended solely as a decision-support aid and **requires professional analyst interpretation** to verify the nature and significance of any detected changes.
+*   **No Warranties:** The data is provided "as is" using real-time Copernicus satellite imagery. No guarantee is made regarding the absolute accuracy, completeness, or timeliness of these results, and they should not be used as the sole basis for high-stakes operational or security decisions.
+""")
