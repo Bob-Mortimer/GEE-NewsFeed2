@@ -152,7 +152,6 @@ def create_maps(lat, lon, start1, end1, start2, end2, sensitivity):
     vis_diff = {'min': 1, 'max': 1, 'palette': ['FF0000']} 
     vis_s1 = {'min': -25, 'max': 0}
     
-    # FIX: Force internal map dimensions to 100% so it perfectly fills the outer component
     map_kwargs = {'location': [lat, lon], 'zoom_start': 13, 'tiles': 'CartoDB dark_matter', 'width': '100%', 'height': '100%'}
     
     maps = []
@@ -176,6 +175,32 @@ def create_maps(lat, lon, start1, end1, start2, end2, sensitivity):
 
 st.markdown("<h3 style='text-align: center; color: red; margin-top: -30px; margin-bottom: 0px;'>UNOFFICIAL</h3>", unsafe_allow_html=True)
 st.title("🛰️ Multi-Sensor Intelligence & Monitoring Dashboard")
+
+st.markdown("""
+This dashboard provides a unified tactical monitoring system that pairs multi-sensor satellite data with real-time open-source intelligence. By computing automated server-side optical structural anomalies (SSIM) and cleaned radar variations (SAR log-ratio) across dual time frames via Google Earth Engine, it highlights critical physical shifts on the ground alongside filtered geopolitical briefing updates. Ultimately, it serves as a streamlined, low-latency reconnaissance workspace for detecting and contextualizing changes at key global flashpoints.
+""")
+
+with st.expander("🌍 The Copernicus Programme & Technologies"):
+    st.markdown("""
+    ### 🌍 The Copernicus Programme
+    * **What it is:** The European Union's flagship Earth observation initiative, often called Europe's "eyes on Earth." 👀
+    * **The Goal:** It continuously monitors our planet's environment, oceans, and atmosphere to provide data for climate change tracking, disaster management, and security. 📊
+    * **Open Data:** The programme collects vast amounts of global data daily from satellites and ground sensors, making it completely free and open to scientists, businesses, and the public. 🔓
+
+    ### 🛰️ Sentinel-1 Mission
+    * **The Radar Specialist:** Sentinel-1 is a polar-orbiting satellite constellation focused entirely on radar imaging. 📡
+    * **Day & Night Vision:** Because it uses radar rather than optical cameras, it can capture high-resolution images of Earth's surface through total darkness, heavy rain, and thick cloud cover. ☁️🌙
+    * **Primary Uses:** It is primarily used to track Arctic sea ice extent, monitor oil spills, map floods, and detect subtle ground movements caused by earthquakes or landslides. 🌋
+
+    ### 📸 Sentinel-2 Mission
+    * **The Optical Photographer:** Sentinel-2 is a constellation of twin satellites equipped with high-resolution multispectral optical cameras. 🗺️
+    * **Color and Beyond:** It captures imagery across 13 different light bands, including visible color (red, green, blue) and infrared light, which helps analyze things invisible to the human eye. 🌈
+    * **Primary Uses:** It acts as an agricultural powerhouse, widely used to monitor crop health, track global deforestation, map changes in land cover, and monitor inland water bodies like lakes and rivers. 🌲🌾
+
+    ### 📡 What is Synthetic Aperture Radar (SAR)?
+    * **Active Sensing:** Unlike standard cameras that rely on sunlight, a SAR instrument acts like a flashlight. It actively transmits its own microwave radio signals down to Earth and measures the echo that bounces back. 🔦
+    * **The "Synthetic Trick":** To get crisp, high-resolution images, a radar satellite traditionally needs a massive physical antenna. SAR tricks physics by using the physical forward movement of the satellite itself to "simulate" a much larger antenna (a synthetic aperture), creating incredibly sharp images. 🧠
+    """)
 
 # ----------------- LEFT SIDEBAR (Inputs) -----------------
 location_query = st.sidebar.text_input("📍 Target Location (City, Base, Coordinates):")
@@ -239,7 +264,6 @@ with col_maps:
             maps = create_maps(lat_val, lon_val, start1, end1, start2, end2, sensitivity_val)
             
         def render_map_card(title, map_obj, subtitle):
-            # Tighter text formatting above each map to reclaim vertical space
             st.markdown(
                 f"<div style='margin-bottom: 0px; margin-top: 5px;'>"
                 f"<h5 style='margin: 0px; padding: 0px;'>{title}</h5>"
@@ -248,16 +272,10 @@ with col_maps:
                 unsafe_allow_html=True
             )
             
-            # FIX: Extract raw HTML using .get_root().render() instead of _repr_html_() to avoid double-iframing
             map_html = map_obj.get_root().render()
-            
-            # FIX: Explicitly strip body margins inside the pure HTML structure
             map_html = map_html.replace("<head>", "<head><style>html, body {width: 100% !important; height: 100% !important; overflow: hidden !important; margin: 0 !important; padding: 0 !important;}</style>")
-            
-            # Increased map height to 550px for maximum screen utilization
             components.html(map_html, height=550, scrolling=False)
 
-        # Map Grid with compressed gap logic
         map_row1_col1, map_row1_col2 = st.columns(2, gap="small")
         with map_row1_col1:
             render_map_card("1. Optical Baseline", maps[0], "Sentinel-2 | Standard RGB")
