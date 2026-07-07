@@ -177,7 +177,7 @@ st.markdown("<h3 style='text-align: center; color: red; margin-top: -30px; margi
 st.title("🛰️ Multi-Sensor Intelligence & Monitoring Dashboard")
 
 st.markdown("""
-This dashboard provides a unified tactical monitoring system that pairs multi-sensor satellite data with real-time open-source intelligence. By computing automated server-side optical structural anomalies (SSIM) and cleaned radar variations (SAR log-ratio) across dual time frames via Google Earth Engine, it highlights critical physical shifts on the ground alongside filtered geopolitical briefing updates. Ultimately, it serves as a streamlined, low-latency reconnaissance workspace for detecting and contextualizing changes at key global flashpoints.
+This dashboard provides a unified tactical monitoring system that pairs multi-sensor satellite data with real-time open-source intelligence. By computing automated server-side optical structural anomalies (SSIM) and cleaned radar variations (SAR log-ratio) across dual time frames via Google Earth Engine, it highlights critical physical shifts on the ground alongside filtered geopolitical briefing updates. Ultimately, it serves as a streamlined, low-latency reconnaissance workspace for detecting and contextualising changes at key global flashpoints.
 """)
 
 with st.expander("🌍 The Copernicus Programme & Technologies"):
