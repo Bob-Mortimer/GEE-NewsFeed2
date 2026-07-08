@@ -9,7 +9,6 @@ from google.oauth2 import service_account
 # =========================================================================
 # 1. PAGE CONFIGURATION & INITIALIZATION
 # =========================================================================
-# Set wide layout and minimize Streamlit's default block padding via CSS
 st.set_page_config(layout="wide", page_title="Geospatial Intelligence Dashboard")
 
 st.markdown("""
@@ -165,6 +164,10 @@ def create_maps(lat, lon, start1, end1, start2, end2, sensitivity):
         add_ee_layer(m, layer_setup[0], layer_setup[1], layer_setup[2])
         if len(layer_setup) > 3:
             add_ee_layer(m, layer_setup[3], layer_setup[4], layer_setup[5])
+            
+        # FIX: Added native LayerControl to toggle layers on and off interactively
+        folium.LayerControl(position='topright').add_to(m)
+        
         maps.append(m)
         
     return maps
@@ -218,7 +221,6 @@ if location_query:
         st.sidebar.warning("Could not find coordinates. Using default.")
 
 with st.sidebar.form("dashboard_controls"):
-    # Using columns inside the sidebar to compress vertical space
     col_lat, col_lon = st.columns(2)
     with col_lat:
         lat_val = st.number_input("Latitude", value=float(default_lat), format="%.6f")
